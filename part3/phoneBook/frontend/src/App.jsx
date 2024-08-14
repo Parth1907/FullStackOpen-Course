@@ -31,6 +31,7 @@ const App = () => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		const id = persons.find((person) => person.name === newName)?.id;
+
 		if (id) {
 			const confirm = window.confirm(
 				`${newName} is already added to phonebook, replace the old number with a new one?`
@@ -41,14 +42,21 @@ const App = () => {
 						name: newName,
 						number: newPhone,
 					})
-					.then(() => {
+					.then((updatedPerson) => {
+						// console.log(persons);
+						const updatedPersons = persons.filter(
+							(person) => person.id !== updatedPerson.id
+						);
+						setPersons([...updatedPersons, updatedPerson]);
 						setMessage(`Updated ${newName}`);
 						setTimeout(() => {
 							setMessage(null);
 						}, 5000);
 					})
 					.catch((err) => {
-						setMessage(`Error occured in updating the person ${err}`);
+						setMessage(
+							`Error occured in updating the person ${err.response.data.error}`
+						);
 						setHasError(true);
 						setTimeout(() => {
 							setMessage(null);
@@ -67,15 +75,15 @@ const App = () => {
 					name: newName,
 					number: newPhone,
 				})
-				.then((persons) => {
-					setPersons(persons);
+				.then((newPerson) => {
+					setPersons([...persons, newPerson]);
 					setMessage(`Added ${newName}`);
 					setTimeout(() => {
 						setMessage(null);
 					}, 5000);
 				})
 				.catch((err) => {
-					setMessage(`Error occured in creating person ${err}`);
+					setMessage(`Error occured in creating person ${err.response.data.error}`);
 					setHasError(true);
 					setTimeout(() => {
 						setMessage(null);
@@ -93,7 +101,7 @@ const App = () => {
 		personService
 			.deletePerson(id)
 			.then(() => {
-				const updatedPersons = persons.filter((person)=>person.id!==id);
+				const updatedPersons = persons.filter((person) => person.id !== id);
 				setPersons(updatedPersons);
 				setMessage(`Deleted ${name}`);
 				setTimeout(() => {
@@ -101,7 +109,9 @@ const App = () => {
 				}, 5000);
 			})
 			.catch((err) => {
-				setMessage(`Error occured in deleting person, ${err}`);
+				setMessage(
+					`Error occured in deleting person, ${err.response.data.error}`
+				);
 				setHasError(true);
 				setTimeout(() => {
 					setMessage(null);
