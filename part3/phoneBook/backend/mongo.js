@@ -8,33 +8,33 @@ const password = process.argv[2];
 // const name = process.argv[3];
 // const number = process.argv[4];
 
-// const url = ;
+const url = `mongodb+srv://kalraparth5682:${password}@cluster0.stg5tfs.mongodb.net/PhoneBook?retryWrites=true&w=majority&appName=Cluster0`;
 
 mongoose.set("strictQuery", false);
 mongoose.connect(url);
 
-const phonebookSchema = new mongoose.Schema({
+const personSchema = new mongoose.Schema({
 	name: String,
 	number: String,
 });
 
-const PhoneBook = mongoose.model("PhoneBook", phonebookSchema);
+const Person = mongoose.model("Person", personSchema);
 
-const phoneBook = new PhoneBook({
-	name: name,
-	number: number,
-});
+// const person = new Person({
+// 	name: name,
+// 	number: number,
+// });
 
-// PhoneBook.save().then((result) => {
-// 	console.log(`added ${name} ${number} to phonebook`);
+// person.save().then((result) => {
+// 	console.log(`added ${result.name} ${result.number} to phonebook`);
 // 	mongoose.connection.close();
 // });
 
-// PhoneBook.find({}).then((result) => {
-// 	console.log("phonebook: ");
+Person.find({}).then((result) => {
+	console.log("phonebook: ");
 	
-// 	result.map((phonebook) => {
-// 		console.log(`${phonebook.name}: ${phonebook.number}`);
-// 	});
-// 	mongoose.connection.close();
-// });
+	result.map((person) => {
+		console.log(`${person.name}: ${person.number}`);
+	});
+	mongoose.connection.close();
+});

@@ -83,7 +83,9 @@ const App = () => {
 					}, 5000);
 				})
 				.catch((err) => {
-					setMessage(`Error occured in creating person ${err.response.data.error}`);
+					setMessage(
+						`Error occured in creating person ${err.response.data.error}`
+					);
 					setHasError(true);
 					setTimeout(() => {
 						setMessage(null);
@@ -97,28 +99,32 @@ const App = () => {
 	};
 
 	const handleDelete = (id, name) => {
-		window.confirm(`Delete ${name}?`);
-		personService
-			.deletePerson(id)
-			.then(() => {
-				const updatedPersons = persons.filter((person) => person.id !== id);
-				setPersons(updatedPersons);
-				setMessage(`Deleted ${name}`);
-				setTimeout(() => {
-					setMessage(null);
-				}, 5000);
-			})
-			.catch((err) => {
-				setMessage(
-					`Error occured in deleting person, ${err.response.data.error}`
-				);
-				setHasError(true);
-				setTimeout(() => {
-					setMessage(null);
-					setHasError(false);
-				}, 5000);
-				console.error("Error occured in deleting the person", err);
-			});
+		const confirm = window.confirm(`Delete ${name}?`);
+		if (confirm) {
+			personService
+				.deletePerson(id)
+				.then(() => {
+					const updatedPersons = persons.filter((person) => person.id !== id);
+					setPersons(updatedPersons);
+					setMessage(`Deleted ${name}`);
+					setTimeout(() => {
+						setMessage(null);
+					}, 5000);
+				})
+				.catch((err) => {
+					setMessage(
+						`Error occured in deleting person, ${err.response.data.error}`
+					);
+					setHasError(true);
+					setTimeout(() => {
+						setMessage(null);
+						setHasError(false);
+					}, 5000);
+					console.error("Error occured in deleting the person", err);
+				});
+		} else {
+			return;
+		}
 	};
 
 	const filteredPersons =

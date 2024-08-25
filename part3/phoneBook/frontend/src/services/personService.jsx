@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl = "http://localhost:3001/api/persons";
+const baseUrl = "https://phonebook-3t2h.onrender.com/api/persons";
 
 const getAllPersons = async () => {
 	const request = axios.get(baseUrl);
