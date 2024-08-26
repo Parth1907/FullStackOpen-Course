@@ -16,9 +16,14 @@ blogRouter.post("/", async (request, response) => {
 			.json({error: "Missing title or url, required fields"});
 	}
 
-	const user = req.user;
-	const blog = new Blog({...request.body, user});
+	if (!request.user) {
+		return response.status(404).json({error: "User not found"});
+	}
+	
+	const blog = new Blog({...request.body, user: request.user.id});
 	const savedBlog = await blog.save();
+
+	const user = await User.findById(request.user.id);
 
 	user.blogs = user.blogs.concat(savedBlog._id);
 	await user.save();

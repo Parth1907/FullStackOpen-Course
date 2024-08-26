@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 const unknownEndpoint = (request, response) => {
 	response.status(404).send({error: "unknown endpoint"});
 };
@@ -51,6 +52,7 @@ const userExtractor = (req, res, next) => {
 	} else {
 		req.user = null;
 	}
+	next()
 };
 
 export {unknownEndpoint, errorHandler, tokenExtractor, userExtractor};

@@ -10,16 +10,15 @@ import mongoose from "mongoose";
 const api = supertest(app);
 const baseUrl = "/api/users";
 
-beforeEach(async () => {
-	await User.deleteMany({});
-
-	const passwordHash = await bcrypt.hash("sekret", 10);
-	const user = new User({username: "root", name: "root", passwordHash});
-
-	await user.save();
-});
-
 describe("when there is initially one user in db", () => {
+	beforeEach(async () => {
+		await User.deleteMany({});
+
+		const passwordHash = await bcrypt.hash("sekret", 10);
+		const user = new User({username: "root", name: "root", passwordHash});
+
+		await user.save();
+	});
 	test("creation of user succeeds with a fresh username", async () => {
 		const usersAtStart = await usersInDb();
 
@@ -63,8 +62,7 @@ describe("when there is initially one user in db", () => {
 
 		assert.strictEqual(usersAtEnd.length, usersAtStart.length);
 	});
-});
-
-after(async () => {
-	await mongoose.connection.close();
+	after(async () => {
+		await mongoose.connection.close();
+	});
 });
