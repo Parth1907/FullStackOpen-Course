@@ -118,7 +118,7 @@ describe("when there are some blogs saved or new blogs are made", () => {
 			.expect(400);
 	});
 
-	test("deletion works as intended", async () => {
+	test("deleting blog works as intended", async () => {
 		const token = await loginAndGetToken();
 		const blogToBeDeleted = {
 			title: "Understanding JavaScript Closures",
@@ -138,7 +138,7 @@ describe("when there are some blogs saved or new blogs are made", () => {
 		assert(!searchForDeletedBlog);
 	});
 
-	test("update works as intended", async () => {
+	test("updating blog works as intended", async () => {
 		const token = await loginAndGetToken();
 		const blogToBeUpdated = {
 			title: "A Guide to Modern CSS Layouts",

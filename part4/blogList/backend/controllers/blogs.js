@@ -51,7 +51,14 @@ blogRouter.delete("/:id", async (req, res) => {
 
 blogRouter.put("/:id", async (req, res) => {
 	const {id} = req.params;
-	const updatedBlog = await Blog.findByIdAndUpdate(id, req.body, {new: true});
-	return res.status(200).json(updatedBlog);
+	const blogToBeUpdated = await Blog.findById(id);
+	const user = req.user;
+
+	if (blogToBeUpdated.user.toString() === user.id) {
+		const updatedBlog = await Blog.findByIdAndUpdate(id, req.body, {new: true});
+		return res.status(200).json(updatedBlog);
+	} else {
+		return res.status(401).json({error: "Unauthorised access"});
+	}
 });
 export default blogRouter;
