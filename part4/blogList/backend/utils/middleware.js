@@ -40,19 +40,23 @@ const tokenExtractor = (req, res, next) => {
 
 const userExtractor = (req, res, next) => {
 	if (req.token) {
-		const decodedToken = jwt.verify(req.token, process.env.SECRET);
-		if (!decodedToken.id) {
-			return response.status(401).json({error: "token invalid"});
+		try {
+			const decodedToken = jwt.verify(req.token, process.env.SECRET);
+			if (!decodedToken.id) {
+				return response.status(401).json({error: "token invalid"});
+			}
+			req.user = {
+				id: decodedToken.id,
+				name: decodedToken.name,
+				username: decodedToken.username,
+			};
+		} catch (error) {
+			console.error(error);
 		}
-		req.user = {
-			id: decodedToken.id,
-			name: decodedToken.name,
-			username: decodedToken.username,
-		};
 	} else {
 		req.user = null;
 	}
-	next()
+	next();
 };
 
 export {unknownEndpoint, errorHandler, tokenExtractor, userExtractor};

@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
-import Blog from "./components/Blog";
-import Notification from "./components/Notification"
+import {useState, useEffect} from "react";
+import Notification from "./components/Notification";
 import blogService from "./services/blogs";
-import loginService from "./services/login"
+import loginService from "./services/login";
+import LoginForm from "./components/LoginForm";
+import CreateBlog from "./components/CreateBlog";
+import Blog from "./components/Blog";
+import Togglable from "./components/Togglable";
 
 const App = () => {
 	const [blogs, setBlogs] = useState([]);
@@ -11,153 +14,142 @@ const App = () => {
 	const [message, setMessage] = useState(null);
 	const [hasError, setHasError] = useState(false);
 	const [user, setUser] = useState(null);
-	const [title, setTitle] = useState("");
-	const [author, setAuthor] = useState("");
-	const [url, setUrl] = useState("");
+
+	const getAllBlogs = async () => {
+		try {
+			const Allblogs = await blogService.getAll();
+			setBlogs(
+				Allblogs.sort((prevBlog, nextBlog) => nextBlog.likes - prevBlog.likes)
+			);
+		} catch (error) {
+			console.error;
+		}
+	};
 
 	const handleLogin = async (e) => {
-		e.preventDefault()
+		e.preventDefault();
 		try {
 			const user = await loginService.login({
-				username, password
+				username,
+				password,
 			});
-			window.localStorage.setItem('user', JSON.stringify(user));
+			window.localStorage.setItem("user", JSON.stringify(user));
 			blogService.setToken(user.token);
 			setUser(user);
-			setUsername("")
-			setPassword("")
+			setUsername("");
+			setPassword("");
 		} catch (error) {
-			setHasError(true)
-			setMessage('Wrong credentials')
+			setHasError(true);
+			setMessage("Wrong credentials");
 			setTimeout(() => {
 				setMessage(null);
 				setHasError(false);
 			}, 5000);
 			console.error("Error occured in getting the user", error);
 		}
-	}
+	};
 
-	const handleCreateBlog = async (e) => {
-		e.preventDefault()
+	const createBlog = async (blogDetails) => {
 		try {
-			const response = await blogService.create({
-				title, author, url
-			})
-			setMessage(`a new blog ${title} by ${author} added`);
-			setBlogs([...blogs, response])
+			const response = await blogService.create(blogDetails);
+			setMessage(
+				`a new blog ${blogDetails.title} by ${blogDetails.author} added`
+			);
+			setBlogs(blogs.concat(response));
 			setTimeout(() => {
 				setMessage(null);
 			}, 5000);
-			setTitle("")
-			setAuthor("")
-			setUrl("")
 		} catch (error) {
-			setHasError(true)
-			setMessage('Error in adding new Blog')
+			setHasError(true);
+			setMessage("Error in adding new Blog");
 			setTimeout(() => {
 				setMessage(null);
 				setHasError(false);
 			}, 5000);
 			console.error("Error occured in getting the user", error);
 		}
-	}
+	};
 
 	const handleLogout = () => {
-		window.localStorage.removeItem("user")
-		blogService.setToken(null)
-		setUser(null)
-	}
+		window.localStorage.removeItem("user");
+		blogService.setToken(null);
+		setUser(null);
+	};
+
+	const handleLike = async (blog) => {
+		try {
+			await blogService.update(blog.id, {
+				title: blog.title,
+				author: blog.author,
+				url: blog.url,
+				likes: blog.likes + 1,
+			});
+
+			getAllBlogs();
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const handleBlogDelete = async (blog) => {
+		const confirm = window.confirm(
+			`Remove blog ${blog.title} by ${blog.author}`
+		);
+		if (confirm) {
+			try {
+				await blogService.deleteBlog(blog.id);
+				getAllBlogs();
+			} catch (error) {
+				console.error(error);
+			}
+		} else {
+			return;
+		}
+	};
 
 	useEffect(() => {
-		const getAllBlogs = async () => {
-			try {
-				const Allblogs = await blogService.getAll()
-				setBlogs(Allblogs.data)
-			} catch (error) {
-				console.error
-			}
-		}
 		const loggedUserJSON = window.localStorage.getItem("user");
 		if (loggedUserJSON) {
 			const user = JSON.parse(loggedUserJSON);
-			setUser(user)
-			blogService.setToken(user.token)
+			setUser(user);
+			blogService.setToken(user.token);
 		}
-		getAllBlogs()
+		getAllBlogs();
 	}, []);
-
 
 	return (
 		<div>
 			<Notification message={message} hasError={hasError} />
 			{user === null ? (
-				<div>
-					<h2>Log in to application</h2>
-					<form onSubmit={handleLogin}>
-						<div className="">
-							username
-							<input
-								type="text"
-								value={username}
-								name="username"
-								onChange={({ target }) => setUsername(target.value)}
-							/>
-						</div>
-						<div className="">
-							password
-							<input
-								type="password"
-								value={password}
-								name="password"
-								onChange={({ target }) => setPassword(target.value)}
-							/>
-						</div>
-						<button type="submit">Login</button>
-					</form>
-				</div>
+				<LoginForm
+					handleLogin={handleLogin}
+					username={username}
+					setUsername={setUsername}
+					password={password}
+					setPassword={setPassword}
+				/>
 			) : (
-				<div>
-					<h2>blogs</h2>
+				<>
+					<h2>Blogs</h2>
 					<div className="">
 						<p>{user.name} logged-in</p>
 						<button onClick={handleLogout}>Logout</button>
 					</div>
-					<h3>Create new Blog</h3>
-					<form onSubmit={handleCreateBlog}>
-						<div className="">
-							title
-							<input
-								type="text"
-								value={title}
-								name="title"
-								onChange={({ target }) => setTitle(target.value)}
-							/>
-						</div>
-						<div className="">
-							author
-							<input
-								type="text"
-								value={author}
-								name="author"
-								onChange={({ target }) => setAuthor(target.value)}
-							/>
-						</div>
-						<div className="">
-							url
-							<input
-								type="text"
-								value={url}
-								name="url"
-								onChange={({ target }) => setUrl(target.value)}
-							/>
-						</div>
-						<button type="submit">Create</button>
-					</form>
+					<Togglable buttonLabel={"new blog"}>
+						<CreateBlog createBlog={createBlog} />
+					</Togglable>
+
 					<h3>All Blogs</h3>
 					{blogs.map((blog) => (
-						<Blog key={blog.id} blog={blog} />
+						<Blog
+							key={blog.id}
+							blog={blog}
+							handleLike={handleLike}
+							handleBlogDelete={handleBlogDelete}
+							user={user}
+						/>
 					))}
-				</div>
+				</>
 			)}
 		</div>
 	);

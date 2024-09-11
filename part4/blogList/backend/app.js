@@ -12,6 +12,7 @@ import {
 	userExtractor,
 } from "./utils/middleware.js";
 import loginRouter from "./controllers/login.js";
+import testingRouter from "./controllers/testing.js";
 
 const app = express();
 
@@ -23,6 +24,10 @@ app.use(cors());
 app.use(json());
 app.use(urlencoded({extended: true}));
 app.use(tokenExtractor);
+
+if (process.env.NODE_ENV === "test") {
+	app.use("/api/testing", testingRouter);
+}
 
 app.use("/api/blogs", userExtractor, blogRouter);
 app.use("/api/users", userRouter);
